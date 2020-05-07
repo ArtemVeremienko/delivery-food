@@ -19,6 +19,17 @@ const cardsMenu = document.querySelector('.cards-menu');
 
 let login = localStorage.getItem('delivery');
 
+const getData = async function (url) {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Ошибка по адресу ${url}, 
+    статус ошибки ${response.status}!`);
+  }
+
+  return await response.json();
+};
+
 const valid = function (str) {
   const nameReg = /^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$/;
   return nameReg.test(str)
@@ -98,41 +109,58 @@ function checkAuth() {
   }
 }
 
-function createCardRestaurnats() {
+function createCardRestaurnats(restaurant) {
+
+  const {
+    image,
+    kitchen,
+    name,
+    price,
+    products,
+    stars,
+    time_of_delivery: timeOfDelivery
+  } = restaurant;
+
+
   const card = `
-          <a class="card card-restaurant">
-            <img src="img/pizza-plus/preview.jpg" alt="image" class="card-image" />
+          <a class="card card-restaurant" data-products="${products}">
+            <img src="${image}" alt="image" class="card-image" />
             <div class="card-text">
               <div class="card-heading">
-                <h3 class="card-title">Пицца плюс</h3>
-                <span class="card-tag tag">50 мин</span>
+                <h3 class="card-title">${name}</h3>
+                <span class="card-tag tag">${timeOfDelivery} мин</span>
               </div>
               <div class="card-info">
                 <div class="rating">
-                  4.5
+                  ${stars}
                 </div>
-                <div class="price">От 900 ₽</div>
-                <div class="category">Пицца</div>
+                <div class="price">От ${price} ₽</div>
+                <div class="category">${kitchen}</div>
               </div>
             </div>
           </a>`;
   cardsRestaurants.insertAdjacentHTML('afterbegin', card);
 }
 
-function createCardGood() {
+function createCardGood({
+  description,
+  id,
+  image,
+  name,
+  price
+}) {
   const card = document.createElement('div');
   card.className = 'card';
 
   card.insertAdjacentHTML('beforeend', `
-      <img src="img/pizza-plus/pizza-classic.jpg" alt="image" class="card-image" />
+      <img src="${image}" alt="image" class="card-image" />
       <div class="card-text">
         <div class="card-heading">
-          <h3 class="card-title card-title-reg">Пицца Классика</h3>
+          <h3 class="card-title card-title-reg">${name}</h3>
         </div>
         <!-- /.card-heading -->
         <div class="card-info">
-          <div class="ingredients">Соус томатный, сыр «Моцарелла», сыр «Пармезан», ветчина, салями,
-            грибы.
+          <div class="ingredients">${description}
           </div>
         </div>
         <!-- /.card-info -->
@@ -141,7 +169,7 @@ function createCardGood() {
             <span class="button-card-text">В корзину</span>
             <span class="button-cart-svg"></span>
           </button>
-          <strong class="card-price-bold">510 ₽</strong>
+          <strong class="card-price-bold">${price} ₽</strong>
         </div>
       </div>
   `);
@@ -161,36 +189,40 @@ function openGoods(event) {
     return;
   }
 
+
+
+
   cardsMenu.textContent = '';
   containerPromo.classList.add('hide');
   restaurants.classList.add('hide');
   menu.classList.remove('hide');
 
-
-  createCardGood();
-  createCardGood();
-  createCardGood();
+  getData(`./db/${restaurant.dataset.products}`).then(function (data) {
+    data.forEach(createCardGood);
+  });
 }
 
-cartButton.addEventListener("click", toggleModal);
+function init() {
+  getData('./db/partners.json').then(function (data) {
+    data.forEach(createCardRestaurnats);
+  })
 
-close.addEventListener("click", toggleModal);
+  cartButton.addEventListener("click", toggleModal);
 
-cardsRestaurants.addEventListener('click', openGoods);
+  close.addEventListener("click", toggleModal);
 
-logo.addEventListener('click', returnMain);
+  cardsRestaurants.addEventListener('click', openGoods);
 
-checkAuth()
+  logo.addEventListener('click', returnMain);
 
-createCardRestaurnats()
-createCardRestaurnats()
-createCardRestaurnats()
+  checkAuth()
 
-new Swiper('.swiper-container', {
-  loop: true,
-  autoplay: {
-    delay: 3000
-  },
-  sliderPerView: 1,
-  slidesPerColumn: 1
-});
+  new Swiper('.swiper-container', {
+    loop: true,
+    autoplay: {
+      delay: 3000
+    }
+  });
+}
+
+init();
