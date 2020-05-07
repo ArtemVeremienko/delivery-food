@@ -180,5 +180,9 @@ createCardRestaurnats()
 
 new Swiper('.swiper-container', {
   loop: true,
-  autoplay: true
+  autoplay: {
+    delay: 3000
+  },
+  sliderPerView: 1,
+  slidesPerColumn: 1
 });
