@@ -178,11 +178,7 @@ close.addEventListener("click", toggleModal);
 
 cardsRestaurants.addEventListener('click', openGoods);
 
-logo.addEventListener('click', function () {
-  containerPromo.classList.remove('hide')
-  restaurants.classList.remove('hide')
-  menu.classList.add('hide')
-})
+logo.addEventListener('click', returnMain);
 
 checkAuth()
 
