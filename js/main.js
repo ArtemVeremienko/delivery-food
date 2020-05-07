@@ -13,9 +13,10 @@ const buttonOut = document.querySelector('.button-out');
 const cardsRestaurants = document.querySelector('.cards-restaurants');
 const containerPromo = document.querySelector('.container-promo');
 const restaurants = document.querySelector('.restaurants');
-const menu = document.querySelector('.menu');
 const logo = document.querySelector('.logo');
-const cardsMenu = document.querySelector('.cards-menu');
+const menu = document.querySelector('.menu');
+const cardsMenu = menu.querySelector('.cards-menu');
+const cardsHeading = menu.querySelector('.section-heading');
 
 let login = localStorage.getItem('delivery');
 
@@ -177,6 +178,26 @@ function createCardGood({
   cardsMenu.append(card);
 }
 
+function createCardsHeading(card) {
+
+  getData('./db/partners.json').then(function (data) {
+    let heading = data.find(element => element.products == card.dataset.products);
+
+    const { name, stars, price, kitchen } = heading;
+
+    cardsHeading.insertAdjacentHTML('afterbegin',
+      `<h2 class="section-title restaurant-title">${name}</h2>
+    <div class="card-info">
+      <div class="rating">
+        ${stars}
+      </div>
+      <div class="price">От ${price} ₽</div>
+      <div class="category">${kitchen}</div>
+    </div>`);
+
+  });
+}
+
 function openGoods(event) {
 
   const target = event.target;
@@ -189,13 +210,13 @@ function openGoods(event) {
     return;
   }
 
-
-
-
+  cardsHeading.textContent = '';
   cardsMenu.textContent = '';
   containerPromo.classList.add('hide');
   restaurants.classList.add('hide');
   menu.classList.remove('hide');
+
+  createCardsHeading(restaurant);
 
   getData(`./db/${restaurant.dataset.products}`).then(function (data) {
     data.forEach(createCardGood);
