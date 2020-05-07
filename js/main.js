@@ -19,6 +19,11 @@ const cardsMenu = document.querySelector('.cards-menu');
 
 let login = localStorage.getItem('delivery');
 
+const valid = function (str) {
+  const nameReg = /^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$/;
+  return nameReg.test(str)
+}
+
 function toggleModal() {
   modal.classList.toggle("is-open");
 }
@@ -58,8 +63,8 @@ function notAutorized() {
 
     login = loginInput.value;
 
-    if (!login) {
-      alert('Введите логин!');
+    if (!valid(login)) {
+      alert('Введите правильный логин!');
       return;
     };
 
