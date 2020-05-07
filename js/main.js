@@ -1,5 +1,5 @@
 'use strict';
-// day 2
+
 const cartButton = document.querySelector("#cart-button");
 const modal = document.querySelector(".modal");
 const close = document.querySelector(".close");
