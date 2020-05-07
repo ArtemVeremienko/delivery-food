@@ -138,15 +138,16 @@ function createCardGood() {
 }
 
 function openGoods(event) {
-  if (!login) {
-    toggleModalAuth();
-    return;
-  }
 
   const target = event.target;
   const restaurant = target.closest('.card-restaurant');
 
   if (!restaurant) return;
+
+  if (!login) {
+    toggleModalAuth();
+    return;
+  }
 
   cardsMenu.textContent = '';
   containerPromo.classList.add('hide');
@@ -176,3 +177,8 @@ checkAuth()
 createCardRestaurnats()
 createCardRestaurnats()
 createCardRestaurnats()
+
+new Swiper('.swiper-container', {
+  loop: true,
+  autoplay: true
+});
