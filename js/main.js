@@ -32,6 +32,12 @@ function toggleModalAuth() {
   modalAuth.classList.toggle('is-open');
 }
 
+function returnMain() {
+  containerPromo.classList.remove('hide');
+  restaurants.classList.remove('hide');
+  menu.classList.add('hide');
+}
+
 function autorized() {
 
   function logOut() {
@@ -42,6 +48,7 @@ function autorized() {
     buttonOut.style.display = '';
     buttonOut.removeEventListener('click', logOut);
     checkAuth();
+    returnMain();
   }
 
   console.log('Авторизован');
