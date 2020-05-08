@@ -124,8 +124,8 @@ function createCardRestaurnats(restaurant) {
 
 
   const card = `
-          <a class="card card-restaurant" data-products="${products}">
-            <img src="${image}" alt="image" class="card-image" />
+          <a class="card card-restaurant" data-products="${products}" data-info="${[name, stars, price, kitchen]}">
+            <img src="${image}" alt="${name}" class="card-image" />
             <div class="card-text">
               <div class="card-heading">
                 <h3 class="card-title">${name}</h3>
@@ -154,7 +154,7 @@ function createCardGood({
   card.className = 'card';
 
   card.insertAdjacentHTML('beforeend', `
-      <img src="${image}" alt="image" class="card-image" />
+      <img src="${image}" alt="${name}" class="card-image" />
       <div class="card-text">
         <div class="card-heading">
           <h3 class="card-title card-title-reg">${name}</h3>
@@ -178,15 +178,11 @@ function createCardGood({
   cardsMenu.append(card);
 }
 
-function createCardsHeading(card) {
+// создаёт хедер для карточек с информацией магазина с которго зашли
+function createCardsHeading([name, stars, price, kitchen]) {
 
-  getData('./db/partners.json').then(function (data) {
-    let heading = data.find(element => element.products == card.dataset.products);
-
-    const { name, stars, price, kitchen } = heading;
-
-    cardsHeading.insertAdjacentHTML('afterbegin',
-      `<h2 class="section-title restaurant-title">${name}</h2>
+  cardsHeading.insertAdjacentHTML('afterbegin',
+    `<h2 class="section-title restaurant-title">${name}</h2>
     <div class="card-info">
       <div class="rating">
         ${stars}
@@ -195,20 +191,19 @@ function createCardsHeading(card) {
       <div class="category">${kitchen}</div>
     </div>`);
 
-  });
 }
 
 function openGoods(event) {
-
-  const target = event.target;
-  const restaurant = target.closest('.card-restaurant');
-
-  if (!restaurant) return;
 
   if (!login) {
     toggleModalAuth();
     return;
   }
+
+  const target = event.target;
+  const restaurant = target.closest('.card-restaurant');
+
+  if (!restaurant) return;
 
   cardsHeading.textContent = '';
   cardsMenu.textContent = '';
@@ -216,7 +211,7 @@ function openGoods(event) {
   restaurants.classList.add('hide');
   menu.classList.remove('hide');
 
-  createCardsHeading(restaurant);
+  createCardsHeading(restaurant.dataset.info.split(','));
 
   getData(`./db/${restaurant.dataset.products}`).then(function (data) {
     data.forEach(createCardGood);
