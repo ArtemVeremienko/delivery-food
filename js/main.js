@@ -23,13 +23,7 @@ const modalPrice = document.querySelector('.modal-pricetag');
 const buttonClearCart = document.querySelector('.clear-cart');
 
 let login = localStorage.getItem('delivery');
-
 let cart = localStorage.getItem('cart'); // список товаров в корзине
-if (cart) {
-  cart = JSON.parse(cart);
-} else {
-  cart = [];
-}
 
 const getData = async function (url) {
   const response = await fetch(url);
@@ -85,6 +79,7 @@ function autorized() {
   }
 
   userName.textContent = login;
+  cart = JSON.parse(localStorage.getItem('cart')) || [];
 
   buttonAuth.style.display = 'none';
   userName.style.display = 'inline';
@@ -106,6 +101,8 @@ function notAutorized() {
     };
 
     localStorage.setItem('delivery', login);
+
+    cart = [];
 
     toggleModalAuth();
     buttonAuth.removeEventListener('click', toggleModalAuth);
@@ -323,6 +320,7 @@ function init() {
 
   buttonClearCart.addEventListener('click', () => {
     cart.length = 0;
+    localStorage.removeItem('cart');
     renderCart();
   })
 
