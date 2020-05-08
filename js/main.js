@@ -1,5 +1,5 @@
 'use strict';
-// day 2
+
 const cartButton = document.querySelector("#cart-button");
 const modal = document.querySelector(".modal");
 const close = document.querySelector(".close");
@@ -45,14 +45,14 @@ function toggleModalAuth() {
   modalAuth.classList.toggle('is-open');
 }
 
-// показывает начальный вид страницу
+// показывает список ресторанов и скрывает меню с карточками товаров
 function returnMain() {
   containerPromo.classList.remove('hide');
   restaurants.classList.remove('hide');
   menu.classList.add('hide');
 }
 
-// показывает меню с карточками товаров
+// показывает меню с карточками товаров и скрывает с ресторанами
 function showMenu() {
   containerPromo.classList.add('hide');
   restaurants.classList.add('hide');
