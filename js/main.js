@@ -23,7 +23,13 @@ const modalPrice = document.querySelector('.modal-pricetag');
 const buttonClearCart = document.querySelector('.clear-cart');
 
 let login = localStorage.getItem('delivery');
-const cart = []; // список товаров в корзине
+
+let cart = localStorage.getItem('cart'); // список товаров в корзине
+if (cart) {
+  cart = JSON.parse(cart);
+} else {
+  cart = [];
+}
 
 const getData = async function (url) {
   const response = await fetch(url);
@@ -67,6 +73,7 @@ function autorized() {
 
   function logOut() {
     login = localStorage.removeItem('delivery');
+    cart = localStorage.removeItem('cart');
 
     buttonAuth.style.display = '';
     userName.style.display = '';
@@ -250,6 +257,8 @@ function addToCart(event) {
   } else {
     cart.push({ id, title, cost, count: 1 });
   }
+
+  localStorage.setItem('cart', JSON.stringify(cart));
 }
 
 function renderCart() {
@@ -294,6 +303,7 @@ function changeCount(event) {
     }
 
     renderCart();
+    localStorage.setItem('cart', JSON.stringify(cart));
   }
 }
 
