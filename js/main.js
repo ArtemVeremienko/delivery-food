@@ -18,8 +18,12 @@ const menu = document.querySelector('.menu');
 const cardsMenu = menu.querySelector('.cards-menu');
 const cardsHeading = menu.querySelector('.section-heading');
 const inputSearch = document.querySelector('.input-search');
+const modalBody = document.querySelector('.modal-body');
+const modalPrice = document.querySelector('.modal-pricetag');
+const buttonClearCart = document.querySelector('.clear-cart');
 
 let login = localStorage.getItem('delivery');
+const cart = []; // список товаров в корзине
 
 const getData = async function (url) {
   const response = await fetch(url);
@@ -67,24 +71,22 @@ function autorized() {
     buttonAuth.style.display = '';
     userName.style.display = '';
     buttonOut.style.display = '';
+    cartButton.style.display = '';
     buttonOut.removeEventListener('click', logOut);
     checkAuth();
     returnMain();
   }
 
-  console.log('Авторизован');
-
   userName.textContent = login;
 
   buttonAuth.style.display = 'none';
   userName.style.display = 'inline';
-  buttonOut.style.display = 'block';
-
+  buttonOut.style.display = 'flex';
+  cartButton.style.display = 'flex';
   buttonOut.addEventListener('click', logOut);
 }
 
 function notAutorized() {
-  console.log('Не авторизован');
 
   function logIn(event) {
     event.preventDefault();
@@ -161,7 +163,7 @@ function createCardGood({
 }) {
   const card = document.createElement('div');
   card.className = 'card';
-
+  card.id = id;
   card.insertAdjacentHTML('beforeend', `
       <img src="${image}" alt="${name}" class="card-image" />
       <div class="card-text">
@@ -179,7 +181,7 @@ function createCardGood({
             <span class="button-card-text">В корзину</span>
             <span class="button-cart-svg"></span>
           </button>
-          <strong class="card-price-bold">${price} ₽</strong>
+          <strong class="card-price card-price-bold">${price} ₽</strong>
         </div>
       </div>
   `);
@@ -231,12 +233,88 @@ function openGoods(event) {
   });
 }
 
+function addToCart(event) {
+  const target = event.target;
+  const buttonAddToCart = target.closest('.button-add-cart');
+
+  if (!buttonAddToCart) return;
+
+  const card = buttonAddToCart.closest('.card');
+  const title = card.querySelector('.card-title-reg').textContent;
+  const cost = card.querySelector('.card-price').textContent;
+  const id = card.id;
+  const food = cart.find(item => item.id === id);
+
+  if (food) {
+    food.count++;
+  } else {
+    cart.push({ id, title, cost, count: 1 });
+  }
+}
+
+function renderCart() {
+  modalBody.textContent = '';
+
+  cart.forEach(({ id, title, cost, count }) => {
+    const itemCart = `
+      <div class="food-row">
+        <span class="food-name">${title}</span>
+        <strong class="food-price">${cost}</strong>
+        <div class="food-counter">
+          <button class="counter-button counter-minus" data-id="${id}">-</button>
+          <span class="counter">${count}</span>
+          <button class="counter-button counter-plus" data-id="${id}">+</button>
+        </div>
+      </div>
+    `;
+
+    modalBody.insertAdjacentHTML('afterbegin', itemCart);
+  });
+
+  const totalPrice = cart.reduce((result, item) => result + (parseFloat(item.cost) * item.count), 0);
+
+  modalPrice.textContent = `${totalPrice} ₽`;
+}
+
+function changeCount(event) {
+  const target = event.target;
+
+  if (target.classList.contains('counter-button')) {
+    const food = cart.find(item => item.id === target.dataset.id);
+
+    if (target.classList.contains('counter-minus')) {
+      food.count--;
+      if (food.count == 0) {
+        cart.splice(cart.indexOf(food), 1);
+      }
+    }
+
+    if (target.classList.contains('counter-plus')) {
+      food.count++;
+    }
+
+    renderCart();
+  }
+}
+
 function init() {
   getData('./db/partners.json').then(function (data) {
     data.forEach(createCardRestaurnats);
   })
 
-  cartButton.addEventListener("click", toggleModal);
+  cartButton.addEventListener("click", () => {
+    renderCart();
+    toggleModal();
+  });
+
+  modalBody.addEventListener('click', changeCount);
+
+  cardsMenu.addEventListener('click', addToCart);
+
+  buttonClearCart.addEventListener('click', () => {
+    cart.length = 0;
+    renderCart();
+  })
 
   close.addEventListener("click", toggleModal);
 
