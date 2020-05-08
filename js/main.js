@@ -93,12 +93,12 @@ function notAutorized() {
   function logIn(event) {
     event.preventDefault();
 
-    login = loginInput.value;
-
-    if (!valid(login)) {
+    if (!valid(loginInput.value)) {
       alert('Введите правильный логин!');
       return;
     };
+
+    login = loginInput.value;
 
     localStorage.setItem('delivery', login);
 
