@@ -17,6 +17,7 @@ const logo = document.querySelector('.logo');
 const menu = document.querySelector('.menu');
 const cardsMenu = menu.querySelector('.cards-menu');
 const cardsHeading = menu.querySelector('.section-heading');
+const inputSearch = document.querySelector('.input-search');
 
 let login = localStorage.getItem('delivery');
 
@@ -44,10 +45,18 @@ function toggleModalAuth() {
   modalAuth.classList.toggle('is-open');
 }
 
+// показывает начальный вид страницу
 function returnMain() {
   containerPromo.classList.remove('hide');
   restaurants.classList.remove('hide');
   menu.classList.add('hide');
+}
+
+// показывает меню с карточками товаров
+function showMenu() {
+  containerPromo.classList.add('hide');
+  restaurants.classList.add('hide');
+  menu.classList.remove('hide');
 }
 
 function autorized() {
@@ -193,6 +202,12 @@ function createCardsHeading([name, stars, price, kitchen]) {
 
 }
 
+// создаёт хедер для результат поиска
+function createSearchHeading(title) {
+  cardsHeading.insertAdjacentHTML('afterbegin',
+    `<h2 class="section-title restaurant-title">${title}</h2>`);
+}
+
 function openGoods(event) {
 
   if (!login) {
@@ -207,9 +222,7 @@ function openGoods(event) {
 
   cardsHeading.textContent = '';
   cardsMenu.textContent = '';
-  containerPromo.classList.add('hide');
-  restaurants.classList.add('hide');
-  menu.classList.remove('hide');
+  showMenu();
 
   createCardsHeading(restaurant.dataset.info.split(','));
 
@@ -230,6 +243,53 @@ function init() {
   cardsRestaurants.addEventListener('click', openGoods);
 
   logo.addEventListener('click', returnMain);
+
+  // поиск по всем товарам
+  inputSearch.addEventListener('keydown', function (event) {
+    if (event.code == 'Enter') {
+      const target = event.target;
+      const value = target.value.toLowerCase().trim();
+      target.value = '';
+
+      if (!value || value.length < 3) {
+        target.style.backgroundColor = 'tomato';
+        setTimeout(() => target.style.backgroundColor = '', 2000);
+        return;
+      }
+
+      const goods = [];
+
+      getData('./db/partners.json')
+        .then(function (data) {
+          const products = data.map(item => item.products)
+
+          products.forEach(product => {
+            getData(`./db/${product}`)
+              .then(data => {
+                goods.push(...data);
+                const searchGoods = goods.filter(item => item.name.toLowerCase().includes(value));
+                cardsHeading.textContent = '';
+                cardsMenu.textContent = '';
+                showMenu();
+
+                createSearchHeading('Результат поиска');
+
+                return searchGoods;
+              })
+              .then(data => {
+                if (data.length) {
+                  data.forEach(createCardGood);
+                } else {
+                  cardsMenu.insertAdjacentHTML('beforeend', '<h2>Ничего не найдено ☹</h2>');
+                }
+
+              });
+          })
+        })
+
+    }
+
+  })
 
   checkAuth()
 
