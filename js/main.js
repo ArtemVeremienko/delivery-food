@@ -23,7 +23,21 @@ const modalPrice = document.querySelector('.modal-pricetag');
 const buttonClearCart = document.querySelector('.clear-cart');
 
 let login = localStorage.getItem('delivery');
-let cart = localStorage.getItem('cart'); // список товаров в корзине
+const cart = []; // список товаров в корзине
+
+// загружаю списко товаров с localStorage
+const loadCart = () => {
+  const value = JSON.parse(localStorage.getItem(login));
+  if (value) cart.push(...value);
+};
+
+// сохраняю список товаров в localStorage
+const saveCart = () => localStorage.setItem(login, JSON.stringify(cart));
+
+const clearCart = () => {
+  cart.length = 0;
+  localStorage.removeItem(login);
+}
 
 const getData = async function (url) {
   const response = await fetch(url);
@@ -67,7 +81,7 @@ function autorized() {
 
   function logOut() {
     login = localStorage.removeItem('delivery');
-    cart = localStorage.removeItem('cart');
+    cart.length = 0;
 
     buttonAuth.style.display = '';
     userName.style.display = '';
@@ -79,13 +93,13 @@ function autorized() {
   }
 
   userName.textContent = login;
-  cart = JSON.parse(localStorage.getItem('cart')) || [];
 
   buttonAuth.style.display = 'none';
   userName.style.display = 'inline';
   buttonOut.style.display = 'flex';
   cartButton.style.display = 'flex';
   buttonOut.addEventListener('click', logOut);
+  loadCart();
 }
 
 function notAutorized() {
@@ -102,8 +116,6 @@ function notAutorized() {
 
     localStorage.setItem('delivery', login);
 
-    cart = [];
-
     toggleModalAuth();
     buttonAuth.removeEventListener('click', toggleModalAuth);
     closeAuth.removeEventListener('click', toggleModalAuth);
@@ -117,13 +129,7 @@ function notAutorized() {
   logInForm.addEventListener('submit', logIn);
 }
 
-function checkAuth() {
-  if (login) {
-    autorized();
-  } else {
-    notAutorized();
-  }
-}
+const checkAuth = () => login ? autorized() : notAutorized();
 
 function createCardRestaurnats(restaurant) {
 
@@ -232,9 +238,7 @@ function openGoods(event) {
 
   createCardsHeading(restaurant.dataset.info.split(','));
 
-  getData(`./db/${restaurant.dataset.products}`).then(function (data) {
-    data.forEach(createCardGood);
-  });
+  getData(`./db/${restaurant.dataset.products}`).then(data => data.forEach(createCardGood));
 }
 
 function addToCart(event) {
@@ -255,7 +259,7 @@ function addToCart(event) {
     cart.push({ id, title, cost, count: 1 });
   }
 
-  localStorage.setItem('cart', JSON.stringify(cart));
+  saveCart();
 }
 
 function renderCart() {
@@ -282,6 +286,7 @@ function renderCart() {
   modalPrice.textContent = `${totalPrice} ₽`;
 }
 
+// обновляем данные при изменении колчества товаров в корзине
 function changeCount(event) {
   const target = event.target;
 
@@ -300,19 +305,16 @@ function changeCount(event) {
     }
 
     renderCart();
-    localStorage.setItem('cart', JSON.stringify(cart));
+    saveCart();
   }
+
 }
 
 function init() {
-  getData('./db/partners.json').then(function (data) {
-    data.forEach(createCardRestaurnats);
-  })
+  getData('./db/partners.json').then(data => data.forEach(createCardRestaurnats));
 
-  cartButton.addEventListener("click", () => {
-    renderCart();
-    toggleModal();
-  });
+  cartButton.addEventListener("click", renderCart);
+  cartButton.addEventListener("click", toggleModal);
 
   modalBody.addEventListener('click', changeCount);
 
@@ -320,7 +322,7 @@ function init() {
 
   buttonClearCart.addEventListener('click', () => {
     cart.length = 0;
-    localStorage.removeItem('cart');
+    saveCart();
     renderCart();
   })
 
@@ -331,11 +333,10 @@ function init() {
   logo.addEventListener('click', returnMain);
 
   // поиск по всем товарам
-  inputSearch.addEventListener('keydown', function (event) {
+  inputSearch.addEventListener('keydown', event => {
     if (event.code == 'Enter') {
       const target = event.target;
       const value = target.value.toLowerCase().trim();
-      target.value = '';
 
       if (!value || value.length < 3) {
         target.style.backgroundColor = 'tomato';
@@ -343,10 +344,12 @@ function init() {
         return;
       }
 
+      target.value = '';
+
       const goods = [];
 
       getData('./db/partners.json')
-        .then(function (data) {
+        .then(data => {
           const products = data.map(item => item.products)
 
           products.forEach(product => {
@@ -366,7 +369,7 @@ function init() {
                 if (data.length) {
                   data.forEach(createCardGood);
                 } else {
-                  cardsMenu.insertAdjacentHTML('beforeend', '<h2>Ничего не найдено ☹</h2>');
+                  cardsMenu.insertAdjacentHTML('beforeend', `<p>По запросу <b>'${value}'</b> ничего не найдено ☹</p>`);
                 }
 
               });
